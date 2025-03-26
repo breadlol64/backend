@@ -1,5 +1,6 @@
 mod routes;
 mod models;
+mod jwt;
 
 use actix_web::{web, App, HttpServer};
 use sqlx::PgPool;

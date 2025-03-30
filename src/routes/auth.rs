@@ -57,7 +57,8 @@ async fn auth_discord(
     let body = TokenReqBody {
         grant_type: "authorization_code".to_string(),
         code: code.to_string(),
-        redirect_uri: "http://localhost:3000/callback".to_string(),
+        // TODO: a better way for getting the redirect uri
+        redirect_uri: "https://breadlol64.netlify.app/callback".to_string(),
     };
 
     let encoded_body = serde_urlencoded::to_string(&body)

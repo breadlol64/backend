@@ -28,6 +28,7 @@ pub fn gen_jwt(subject: &str) -> String{
     token
 }
 
+/// Returns the subject(user id) from token
 pub fn decode_jwt(token: &str) -> String {
     let key = env::var("JWT_KEY").expect("JWT_KEY must be set");
 

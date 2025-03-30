@@ -120,5 +120,5 @@ async fn auth_discord(
 
     let token = jwt::gen_jwt(&user.id.to_string());
 
-    Ok(HttpResponse::Ok().body(token))
+    Ok(HttpResponse::Ok().body(format!(r#"{{"token": "{}"}}"#, token)))
 }

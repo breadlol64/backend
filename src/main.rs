@@ -2,6 +2,7 @@ mod routes;
 mod models;
 mod jwt;
 
+use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
 use sqlx::PgPool;
 use dotenv::dotenv;
@@ -23,7 +24,9 @@ async fn main() -> std::io::Result<()>{
 
     println!("starting on {}:{}", addr, port);
     HttpServer::new(move || {
+        let cors = Cors::permissive();
         App::new()
+            .wrap(cors)
             .app_data(web::Data::new(pool.clone()))
             .configure(routes::configure_routes)
     })

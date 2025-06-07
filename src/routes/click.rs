@@ -7,7 +7,7 @@ use crate::models::User;
 pub fn configure_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("")
-            .route("/click", web::get().to(click))
+            .route("/click", web::patch().to(click))
     );
 }
 
@@ -23,7 +23,7 @@ async fn click(req: HttpRequest, pool: web::Data<PgPool>) -> impl Responder {
         Err(e) => return HttpResponse::InternalServerError().body(e.to_string())
     };
 
-    user.add_balance(&pool, 1).await.expect("Failed to add balance");
+    let updated_user = user.add_balance(&pool, 1).await.expect("Failed to add balance");
 
-    HttpResponse::Ok().body(format!(r#"{{"balance": {}}}"#, user.balance))
+    HttpResponse::Ok().body(format!(r#"{{"balance": {}}}"#, updated_user.balance))
 }

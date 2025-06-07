@@ -29,26 +29,25 @@ struct TokenResBody {
 struct UserResBody {
     id: String,
     username: String,
-    verified: bool,
-    email: String,
     avatar: String
 }
 
 pub fn configure_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/auth")
-            .route("/discord", web::get().to(auth_discord))
+            .route("/discord", web::post().to(auth_discord))
     );
 }
 
 async fn auth_discord(
-    query: web::Query<Code>,
+    body: web::Json<Code>,
     pool: web::Data<PgPool>
 ) -> Result<HttpResponse, actix_web::Error> {
-    let client_id = env::var("DS_CLIENT_ID").expect("DS_CLIENT_ID must be set");
-    let client_secret = env::var("DS_CLIENT_SECRET").expect("DS_CLIENT_SECRET must be set");
+    let client_id = env::var("DISCORD_CLIENT_ID").expect("DISCORD_CLIENT_ID must be set");
+    let client_secret = env::var("DISCORD_CLIENT_SECRET").expect("DISCORD_CLIENT_SECRET must be set");
+    let redirect_uri = env::var("DISCORD_REDIRECT_URI").expect("DISCORD_REDIRECT_URI must be set");
 
-    let code = &query.code;
+    let code = &body.code;
     let client = reqwest::Client::new();
 
     let mut headers = HeaderMap::new();
@@ -57,8 +56,7 @@ async fn auth_discord(
     let body = TokenReqBody {
         grant_type: "authorization_code".to_string(),
         code: code.to_string(),
-        // TODO: a better way for getting the redirect uri
-        redirect_uri: "https://breadlol64.netlify.app/callback".to_string(),
+        redirect_uri,
     };
 
     let encoded_body = serde_urlencoded::to_string(&body)
@@ -105,7 +103,6 @@ async fn auth_discord(
             match User::create(
                 &pool,
                 &user_data.username,
-                &user_data.email,
                 &format!("https://cdn.discordapp.com/avatars/{}/{}.png", &user_data.id, &user_data.avatar),
                 &user_data.id
             ).await {
